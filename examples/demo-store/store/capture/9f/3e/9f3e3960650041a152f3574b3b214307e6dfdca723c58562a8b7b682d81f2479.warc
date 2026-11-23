@@ -1,0 +1,14 @@
+WARC/1.0
+WARC-Type: response
+WARC-Record-ID: <urn:uuid:a3a3316a-a7f2-565a-b992-b99ea3f35d91>
+WARC-Target-URI: https://example.invalid/acme/mcu100/manual/
+WARC-Date: 2026-11-01T10:30:00Z
+Content-Type: application/http; msgtype=response
+Content-Length: 190
+
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 110
+
+<html><body><h1>ACME MCU100 Web Manual</h1><p>TIMER basic usage.</p><p>Added STOP mode note.</p></body></html>
+
