@@ -1,0 +1,8 @@
+document_id: acme/mcu100/web-manual
+checked_at: '2026-11-01T10:35:00Z'
+previous_capture_id: 2026-10-01T103000Z-web1
+candidate_capture_id: 2026-11-01T103000Z-web2
+result: changed
+review_status: accepted_into_catalog
+note: STOP mode note was added. This file is machine-maintained state, not curated
+  document metadata.

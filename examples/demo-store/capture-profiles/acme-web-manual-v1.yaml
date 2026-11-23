@@ -1,0 +1,21 @@
+id: acme-web-manual
+version: 1
+entrypoints:
+- https://example.invalid/acme/mcu100/manual/
+scope:
+  allowed_paths:
+  - /acme/mcu100/manual/
+  include_assets: true
+  excluded_patterns: []
+environment:
+  tool_version: example-capture/1.0
+  browser_version: example-browser/1.0
+  container_digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+  locale: en-US
+  timezone: UTC
+  viewport: 1280x720
+  clean_browser_profile: true
+access_context:
+  authentication: none
+  documentation_version: null
+  language: en

@@ -1,0 +1,6 @@
+id: acme/mcu100
+kind: chip
+manufacturer: ACME
+name: MCU100
+attributes:
+  family: MCU100
