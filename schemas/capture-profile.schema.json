@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocBOM Web Capture Profile v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "entrypoints",
+    "scope",
+    "environment",
+    "access_context"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "entrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_paths",
+        "include_assets",
+        "excluded_patterns"
+      ],
+      "properties": {
+        "allowed_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "include_assets": {
+          "type": "boolean"
+        },
+        "excluded_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_version",
+        "browser_version",
+        "locale",
+        "timezone",
+        "viewport",
+        "clean_browser_profile"
+      ],
+      "properties": {
+        "tool_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "browser_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "container_digest": {
+          "$ref": "#/$defs/sha256WithPrefix"
+        },
+        "locale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "viewport": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*x[1-9][0-9]*$"
+        },
+        "clean_browser_profile": {
+          "type": "boolean"
+        }
+      }
+    },
+    "access_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authentication",
+        "documentation_version"
+      ],
+      "properties": {
+        "authentication": {
+          "enum": [
+            "none",
+            "account",
+            "restricted"
+          ]
+        },
+        "documentation_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "language": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256WithPrefix": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
