@@ -39,12 +39,15 @@
 schemas/
   subject.schema.json
   document.schema.json
+  capture-profile.schema.json
   project.schema.json
   lock.schema.json
 
 templates/
   subject.yaml
-  document.yaml
+  document.pdf.yaml
+  document.web.yaml
+  document.git.yaml
   project.docbom.yaml
   web-capture-profile.yaml
 
@@ -65,6 +68,7 @@ tests/
 - Reference Manual
 - Silicon A1向けErrata
 - Web Manualの取得版1と取得版2
+- 特定コミットに固定したGit文書（Markdown）
 - 旧版に固定するプロジェクト
 - 新版を採用するプロジェクト
 
@@ -93,7 +97,7 @@ tests/
 - 取得日時を記録する
 - 可能な範囲でタイトルや目次を抽出する
 
-最初の対象はPDFと汎用ファイル。CHMとWeb取得は後続のマイルストーンで追加する。
+初期対応形式はPDF・Webページ・Git文書とする。M2ではPDFとGit文書の取り込みを実装し、Web取得はM3で追加する。CHMなどの追加形式は後続課題とする。
 
 ### validate
 
@@ -204,9 +208,10 @@ init → ingest → validate → resolve → get
 10. Web取得プロファイルの最小項目を決める
 11. 二回取得と差分レポートを実装する
 12. 影響プロジェクトの逆引きを実装する
-13. CHMの原本保存と展開物の扱いを検証する
+13. Git文書をコミットIDとパスで固定して取り込む
 14. アクセス条件と外部AI送信区分を検証する
 15. 実際の個人プロジェクトでの導入手順を文書化する
+16. CHMなど追加形式の原本保存と展開物の扱いを検証する
 
 ## 後回しにするもの
 
