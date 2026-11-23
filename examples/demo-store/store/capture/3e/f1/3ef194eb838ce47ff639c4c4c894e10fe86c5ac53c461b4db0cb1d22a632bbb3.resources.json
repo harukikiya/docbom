@@ -1,0 +1,8 @@
+[
+  {
+    "url": "https://example.invalid/acme/mcu100/manual/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "sha256": "36bda7253bf7e794f8dbbbe2deeb66d930a5a3e6df3bbb64055246a568cb7ace"
+  }
+]
