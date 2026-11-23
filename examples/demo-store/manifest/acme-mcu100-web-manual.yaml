@@ -1,0 +1,47 @@
+id: acme/mcu100/web-manual
+document_type: guide
+title: ACME MCU100 Web Manual
+publisher: ACME
+document_number: null
+language: en
+subjects:
+- ref: acme/mcu100
+relations: []
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: allowed
+  ai_egress: external_allowed
+versions:
+- revision:
+    label: null
+    label_raw: null
+    published: null
+  artifacts:
+  - role: capture
+    kind: web_snapshot
+    capture_id: 2026-10-01T103000Z-web1
+    capture_profile: acme-web-manual/v1
+    acquired_at: '2026-10-01T10:30:00Z'
+    storage_path: store/capture/87/7d/877d03ddae1fc917fa30abacbd2993c64b2ac985e1cd8b8b1de587a362ebd82e.warc
+    sha256: 877d03ddae1fc917fa30abacbd2993c64b2ac985e1cd8b8b1de587a362ebd82e
+    resource_manifest_path: store/capture/d0/ac/d0ac8daee2925c62bf3967cf259f324ec2d7901556ad0553f44df157c2b48f33.resources.json
+    resource_manifest_sha256: d0ac8daee2925c62bf3967cf259f324ec2d7901556ad0553f44df157c2b48f33
+    normalized_content_sha256: a9a675210e5b68158da95e6eb00d5cb473b2e0cf48a7e6c9b1aa0d54dec6f6ca
+    completeness: complete_within_declared_scope
+- revision:
+    label: null
+    label_raw: null
+    published: null
+  artifacts:
+  - role: capture
+    kind: web_snapshot
+    capture_id: 2026-11-01T103000Z-web2
+    capture_profile: acme-web-manual/v1
+    acquired_at: '2026-11-01T10:30:00Z'
+    storage_path: store/capture/9f/3e/9f3e3960650041a152f3574b3b214307e6dfdca723c58562a8b7b682d81f2479.warc
+    sha256: 9f3e3960650041a152f3574b3b214307e6dfdca723c58562a8b7b682d81f2479
+    resource_manifest_path: store/capture/3e/f1/3ef194eb838ce47ff639c4c4c894e10fe86c5ac53c461b4db0cb1d22a632bbb3.resources.json
+    resource_manifest_sha256: 3ef194eb838ce47ff639c4c4c894e10fe86c5ac53c461b4db0cb1d22a632bbb3
+    normalized_content_sha256: 36bda7253bf7e794f8dbbbe2deeb66d930a5a3e6df3bbb64055246a568cb7ace
+    completeness: complete_within_declared_scope

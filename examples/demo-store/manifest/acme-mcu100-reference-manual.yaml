@@ -1,0 +1,31 @@
+id: acme/mcu100/reference-manual
+document_type: reference-manual
+title: ACME MCU100 Reference Manual
+publisher: ACME
+document_number: null
+language: en
+subjects:
+- ref: acme/mcu100
+relations:
+- type: references
+  target: acme/mcu100/datasheet
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: allowed
+  ai_egress: external_allowed
+versions:
+- revision:
+    label: docs-v1.0
+    label_raw: docs-v1.0
+    published: '2026-08-01'
+  artifacts:
+  - role: source
+    kind: git_file
+    repository_url: https://example.invalid/acme/mcu100-docs.git
+    commit: 0123456789abcdef0123456789abcdef01234567
+    tag: docs-v1.0
+    source_path: docs/reference-manual.md
+    acquired_at: '2026-08-15T09:00:00Z'
+    storage_path: store/source/ad/4c/ad4c08a32b1e2b894822400e6faa11583872a7cc59b4da2f7cea0ceec2d75a42.md
+    sha256: ad4c08a32b1e2b894822400e6faa11583872a7cc59b4da2f7cea0ceec2d75a42
