@@ -1,0 +1,27 @@
+# PDF文書の雛形。ダミーのハッシュ・日時・URLを実際の値へ置き換える。
+id: vendor/product/document
+document_type: manual
+title: Example Document
+publisher: Example Vendor
+document_number: DOC-001
+language: en
+subjects:
+- ref: vendor/product
+relations: []
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: unknown
+  ai_egress: unknown
+versions:
+- revision:
+    label: Rev. 1
+    label_raw: Rev. 1
+    published: null
+  artifacts:
+  - role: source
+    kind: pdf
+    acquired_at: '2000-01-01T00:00:00Z'
+    storage_path: store/replace-me/0000000000000000000000000000000000000000000000000000000000000000
+    sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+    source_url: https://example.invalid/document.pdf

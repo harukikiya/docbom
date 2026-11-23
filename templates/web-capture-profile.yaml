@@ -1,0 +1,23 @@
+# 認証情報やCookieはこのファイルへ書かない。
+id: example-web
+version: 1
+entrypoints:
+- https://example.invalid/docs/
+scope:
+  allowed_paths:
+  - /docs/
+  include_assets: true
+  excluded_patterns:
+  - /docs/search
+environment:
+  tool_version: replace-me
+  browser_version: replace-me
+  container_digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  locale: ja-JP
+  timezone: UTC
+  viewport: 1280x720
+  clean_browser_profile: true
+access_context:
+  authentication: none
+  documentation_version: null
+  language: ja

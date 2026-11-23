@@ -1,0 +1,11 @@
+# 人が管理する採用条件。ロックファイルは別途生成する。
+context:
+  subject: vendor/product
+  silicon_rev: A1
+documents:
+- id: vendor/product/datasheet
+  revision: Rev. 1
+- id: vendor/product/errata
+  selection: applicable
+- id: vendor/product/web-manual
+  selection: latest_capture

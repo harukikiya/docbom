@@ -1,0 +1,31 @@
+# Web取得版の雛形。公式版が不明ならrevision.labelをnullにする。
+id: vendor/product/document
+document_type: manual
+title: Example Document
+publisher: Example Vendor
+document_number: DOC-001
+language: en
+subjects:
+- ref: vendor/product
+relations: []
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: unknown
+  ai_egress: unknown
+versions:
+- revision:
+    label: null
+    label_raw: null
+    published: null
+  artifacts:
+  - role: capture
+    kind: web_snapshot
+    acquired_at: '2000-01-01T00:00:00Z'
+    storage_path: store/replace-me/0000000000000000000000000000000000000000000000000000000000000000
+    sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+    capture_id: 2000-01-01T000000Z-replace-me
+    capture_profile: example-web/v1
+    resource_manifest_path: store/capture/resources.json
+    resource_manifest_sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+    completeness: unknown
