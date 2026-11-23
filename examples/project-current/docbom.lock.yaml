@@ -1,0 +1,29 @@
+# M1ではリゾルバ未実装のため、期待される解決結果を手作業で示す。
+lock_version: 1
+catalog_revision: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+resolver_version: 0.1.0-m1-example
+generated_at: '2026-11-01T11:00:00Z'
+documents:
+- id: acme/mcu100/datasheet
+  revision: Rev. 2
+  artifacts:
+  - role: source
+    kind: pdf
+    sha256: 737c1ea803ed2887d15e8f993cc2a509af62ef052d2fbf310561324f02a1a930
+- id: acme/mcu100/reference-manual
+  revision: docs-v1.0
+  artifacts:
+  - role: source
+    kind: git_file
+    repository_url: https://example.invalid/acme/mcu100-docs.git
+    commit: 0123456789abcdef0123456789abcdef01234567
+    source_path: docs/reference-manual.md
+    sha256: ad4c08a32b1e2b894822400e6faa11583872a7cc59b4da2f7cea0ceec2d75a42
+- id: acme/mcu100/web-manual
+  revision: null
+  artifacts:
+  - role: capture
+    kind: web_snapshot
+    capture_id: 2026-11-01T103000Z-web2
+    sha256: 9f3e3960650041a152f3574b3b214307e6dfdca723c58562a8b7b682d81f2479
+    resource_manifest_sha256: 3ef194eb838ce47ff639c4c4c894e10fe86c5ac53c461b4db0cb1d22a632bbb3

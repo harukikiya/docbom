@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocBOM Project Requirements v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "documents"
+  ],
+  "properties": {
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "subject"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "silicon_rev": {
+          "type": "string"
+        },
+        "sdk": {
+          "type": "string"
+        }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selection": {
+            "enum": [
+              "applicable",
+              "latest_capture"
+            ]
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "revision"
+            ]
+          },
+          {
+            "required": [
+              "selection"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

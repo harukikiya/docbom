@@ -1,0 +1,41 @@
+id: acme/mcu100/datasheet
+document_type: datasheet
+title: ACME MCU100 Datasheet
+publisher: ACME
+document_number: ACME-DS-100
+language: en
+subjects:
+- ref: acme/mcu100
+relations: []
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: allowed
+  ai_egress: external_allowed
+versions:
+- revision:
+    label: Rev. 1
+    label_raw: Rev. 1
+    published: '2026-01-15'
+  artifacts:
+  - role: source
+    kind: pdf
+    source_url: https://example.invalid/acme/mcu100/datasheet.pdf
+    acquired_at: '2026-02-01T09:00:00Z'
+    storage_path: store/source/a3/3a/a33a52d356d7cc40f4c316ea718e8817acdaca9d43745783fa19b89b323f6e69.pdf
+    sha256: a33a52d356d7cc40f4c316ea718e8817acdaca9d43745783fa19b89b323f6e69
+- revision:
+    label: Rev. 2
+    label_raw: Rev. 2
+    published: '2026-10-15'
+  artifacts:
+  - role: source
+    kind: pdf
+    source_url: https://example.invalid/acme/mcu100/datasheet.pdf
+    acquired_at: '2026-11-01T09:00:00Z'
+    storage_path: store/source/73/7c/737c1ea803ed2887d15e8f993cc2a509af62ef052d2fbf310561324f02a1a930.pdf
+    sha256: 737c1ea803ed2887d15e8f993cc2a509af62ef052d2fbf310561324f02a1a930
+  relations:
+  - type: supersedes
+    target: acme/mcu100/datasheet
+    target_revision: Rev. 1

@@ -1,0 +1,13 @@
+context:
+  subject: acme/mcu100
+  silicon_rev: A1
+  sdk: '1.2'
+documents:
+- id: acme/mcu100/datasheet
+  revision: Rev. 1
+- id: acme/mcu100/reference-manual
+  revision: docs-v1.0
+- id: acme/mcu100/errata
+  selection: applicable
+- id: acme/mcu100/web-manual
+  selection: latest_capture

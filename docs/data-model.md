@@ -18,7 +18,7 @@
 | Subject | 文書の適用対象 | ACME MCU100、Silicon A1 |
 | Document | 文書系列 | ACME MCU100 Errata |
 | Revision | 公式上の文書版 | Rev. 1 |
-| Source Artifact | ベンダーが配布した実体 | PDF、CHM、SDK ZIP |
+| Source Artifact | ベンダーが配布した実体、または固定されたGit文書 | PDF、Git文書、SDK ZIP |
 | Capture | Webなどから取得した不変の証跡 | WARC、HTML資源群 |
 | Derivative | 実体から生成した利用用データ | 展開HTML、OCR、テキスト |
 | Relation | 文書同士の意味関係 | amends、supersedes |
@@ -106,6 +106,23 @@ versions:
 - `storage_path`
 - `sha256`
 - 外側パッケージがある場合は `package` と `inner_path`
+
+### Git文書
+
+Gitで配布・管理される文書は、ブランチ名だけではなくコミットIDで固定する。初期実装では単一のMarkdownファイルを `kind: git_file` として扱い、元リポジトリ、コミット、パス、保存したファイル実体のハッシュを記録する。
+
+```yaml
+- role: source
+  kind: git_file
+  repository_url: "https://example.invalid/acme/mcu100-docs.git"
+  commit: "0123456789abcdef0123456789abcdef01234567"
+  source_path: "docs/getting-started.md"
+  acquired_at: "2026-11-23T10:15:00+09:00"
+  storage_path: "store/source/98/76/9876....md"
+  sha256: "9876..."
+```
+
+複数ファイルで構成されるGit文書は、後続で `git_tree` とファイル一覧のハッシュを検討する。
 
 ### Capture
 

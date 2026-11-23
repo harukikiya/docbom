@@ -1,0 +1,30 @@
+# Git文書の雛形。ブランチではなくコミットIDで固定する。
+id: vendor/product/document
+document_type: manual
+title: Example Document
+publisher: Example Vendor
+document_number: DOC-001
+language: en
+subjects:
+- ref: vendor/product
+relations: []
+access:
+  source_access: public
+  confidentiality: public
+  redistribution: unknown
+  ai_egress: unknown
+versions:
+- revision:
+    label: docs-v1
+    label_raw: docs-v1
+    published: null
+  artifacts:
+  - role: source
+    kind: git_file
+    acquired_at: '2000-01-01T00:00:00Z'
+    storage_path: store/replace-me/0000000000000000000000000000000000000000000000000000000000000000
+    sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+    repository_url: https://example.invalid/vendor/docs.git
+    commit: '0000000000000000000000000000000000000000'
+    tag: docs-v1
+    source_path: docs/manual.md
