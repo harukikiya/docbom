@@ -1,6 +1,6 @@
 # DocBOM CLI利用手順
 
-M3aのCLIは、リポジトリのルートで `python -m docbom` として実行する。Python 3.12を想定する。
+M3のCLIは、リポジトリのルートで `python -m docbom` として実行する。Python 3.12を想定する。
 
 ```sh
 python -m pip install -r requirements-dev.txt
@@ -95,13 +95,13 @@ python -m docbom capture web /path/to/web-capture-profile.yaml \
 
 ### 取得範囲
 
-- entrypointには認証情報を含まない絶対HTTP(S) URLを指定する。M3aでは `authentication: none` のプロファイルだけを実行できる。
+- entrypointには認証情報を含まない絶対HTTP(S) URLを指定する。現在の静的取得では `authentication: none` のプロファイルだけを実行できる。
 - entrypointと同一オリジンのURLだけを取得する。別オリジンのリンクや資源は `cross_origin` として除外する。
 - URLパスが `allowed_paths` のいずれかで始まるものだけを取得し、範囲外は `outside_allowed_paths` として記録する。
 - `excluded_patterns` はURLパスまたはURL全体へ適用するglobパターンとして扱い、一致したURLを `excluded_pattern` として記録する。
 - `include_assets: true` ではHTMLのリンクに加え、stylesheet、icon、画像、CSS中の `url()` と `@import` をたどる。`false` ではHTMLページだけを取得し、資源は `assets_disabled` として記録する。
 - URLのフラグメントは除去する。JavaScriptは実行せず、script要素やJavaScriptによって作られるリンクも探索しない。
-- M3aはリダイレクトをたどらない。3xx応答はWARCと資源一覧に保存し、失敗としてレポートする。
+- 静的取得はリダイレクトをたどらない。3xx応答はWARCと資源一覧に保存し、失敗としてレポートする。
 
 除外は宣言した取得範囲の記録であり、それだけでは部分取得にならない。HTTP 4xx・5xx、リダイレクト、ネットワークエラーは失敗として記録する。
 
@@ -114,14 +114,61 @@ state/CAPTURE_ID.capture.yaml
 ```
 
 - WARCには実際に受け取ったHTTP応答を記録する。WARCレコードの `Content-Length` はHTTP応答部分のバイト長、HTTPヘッダの `Content-Length` は本文バイト長に合わせる。
-- 資源一覧は既存例と同じJSON配列で、各応答の `url`、`status`、`content_type`、本文の `sha256` を記録する。ネットワークエラーで応答を受け取れなかったURLは、資源一覧ではなく取得レポートに記録する。
-- 取得レポートには取得成功・失敗・除外のイベント、集計、保存先ハッシュを記録する。`artifact` には、人がDocument YAMLへ登録するための `web_snapshot` 情報を含める。
+- 資源一覧はJSON配列で、各応答の `url`、`status`、`content_type`、本文の `sha256` を記録する。2xxのHTML応答には `normalized_content_sha256` も記録する。ネットワークエラーで応答を受け取れなかったURLは、資源一覧ではなく取得レポートに記録する。
+- 取得レポートには取得成功・失敗・除外のイベント、集計、保存先ハッシュ、完全なCapture Profile、正規化アルゴリズム名を記録する。`artifact` には、人がDocument YAMLへ登録するための `web_snapshot` 情報と、URL順のHTMLページハッシュ集合から計算した全体の `normalized_content_sha256` を含める。
 
 失敗がなければ `completeness: complete_within_declared_scope`、一件でも失敗があれば `partial` となる。部分取得でも証跡とレポートは保存するが、CLIは終了コード1を返す。
 
 **captureコマンドはDocument YAMLとプロジェクトロックを作成・更新しない。** レポートの `artifact` を人が確認し、対象Documentの版へ登録した後に、従来どおり `validate` と `resolve` を実行する。再取得しても、既存のWARC・資源一覧・取得レポートを上書きせず、新しい取得IDで保存する。
 
-## 4. validate
+### HTML正規化本文ハッシュ
+
+正規化アルゴリズム名は `html-visible-text-v1` である。
+
+- 対象はHTTP 2xxかつ `text/html` または `application/xhtml+xml` の応答だけとする。
+- Content-Typeのcharsetでデコードし、指定がなければUTF-8とする。不明なcharsetはUTF-8へフォールバックする。
+- `script`、`style`、`noscript`、`template` の内容を除外し、HTMLの可視文字データを取り出す。ブロック要素を区切りとして扱い、空白を畳む。
+- 正規化したUTF-8テキストのSHA-256をURLごとに計算する。さらに `url` とページハッシュの組をURL順に並べ、正準なJSON配列表現のSHA-256をCapture全体の正規化本文ハッシュとする。
+
+これは意味理解やレイアウト比較ではない。属性やscriptだけの変更では正規化本文が同じでも、応答本文のSHA-256は変わりうる。画像・CSS・その他資源には正規化本文ハッシュを付けず、本文バイト列で比較する。
+
+## 4. compare web
+
+同じCapture Profileで取得した2つのCaptureを比較する。
+
+```sh
+python -m docbom compare web \
+  --store /path/to/docbom-store \
+  --previous 2026-11-25T100000Z-example \
+  --candidate 2026-12-25T100000Z-example \
+  --compared-at 2026-12-25T10:05:00Z
+```
+
+`--previous` と `--candidate` は必須で、同じIDは指定できない。`--compared-at` を省略すると現在のUTC時刻を使う。既定の出力は `state/CANDIDATE_ID.diff.yaml` で、`--output` で別の新規パスも指定できる。既存の比較レポートは上書きしない。
+
+### 比較前の検査
+
+- 両CaptureのWARCと資源一覧について、存在とSHA-256を再検査する。
+- DocBOMが生成したCRLF形式のWARC responseレコードを解析し、資源一覧とのURL・ステータス・Content-Type・本文ハッシュの一致を検査する。
+- HTML正規化本文ハッシュをWARC本文から再計算する。新しい取得レポートに保存済みの値があれば一致も検査する。
+- 新形式同士では、Capture ProfileのID・版だけでなく埋め込まれたプロファイル全体とentrypointsが同じことを要求する。
+- M3a形式など、完全なプロファイルを埋め込んでいないレポートも、ID・版・entrypointsが同じなら比較できる。この場合はプロファイル全体の一致を保証できない旨の警告を出し、正規化ハッシュは再計算する。
+
+### 判定とレポート
+
+URLごとに `added`、`removed`、`changed`、`unchanged` を記録する。比較項目は取得結果、HTTPステータス、Content-Type、応答本文SHA-256、正規化本文SHA-256、除外理由、除外パターン、エラーである。成功・失敗だけでなく、除外されたURLも比較対象に含まれる。
+
+- 全体の `result` は、一つでもURL差分があれば `changed`、なければ `unchanged` とする。
+- WARCのCapture ID・取得時刻・レコードID・WARC SHA-256の差だけを内容変更とみなさない。
+- 応答本文が変われば、正規化HTML本文が同じでも `changed` とする。画像やCSSだけの変更も検出する。
+- `summary` には追加・削除・変更・同一の件数に加え、応答集合、応答本文、正規化本文、失敗、完全性の変化有無を記録する。
+- `review_status` は差分ありなら `pending`、差分なしなら `not_required` とする。`review_cause` は自動記入せず、人が取得の非決定性・取得漏れ・公式側更新などを確認する。
+
+**差分があっても比較処理自体は成功なので終了コード0を返す。** 比較不能、破損、ハッシュ不一致、出力先の既存ファイルなどは終了コード1である。`result` を見ずに終了コードだけで公式側更新を判断しない。
+
+**compareコマンドもDocument YAMLとプロジェクトロックを作成・更新しない。** 新しいCaptureの採用は、比較レポートを確認した人がDocument YAMLへ登録し、必要なプロジェクトだけで明示的に `resolve` して行う。
+
+## 5. validate
 
 ```sh
 python -m docbom validate \
@@ -148,7 +195,7 @@ python -m docbom validate \
 
 検査に失敗した場合は終了コード1を返す。
 
-## 5. resolve
+## 6. resolve
 
 ```sh
 python -m docbom resolve \
@@ -167,7 +214,7 @@ python -m docbom resolve \
 
 `resolve` を実行した場合だけロックを生成・更新する。中央目録への新版登録だけで既存ロックが変わることはない。
 
-## 6. get
+## 7. get
 
 ### ロック済み実体のパスを取得
 
@@ -210,7 +257,7 @@ python -m docbom get vendor/product/datasheet \
   --text --page 3
 ```
 
-同じ文書IDに複数の版や実体がロックされている場合は `--revision` または `--sha256` で特定する。Web取得版の本文抽出、PDFの章検索、Markdownの見出し検索はM3aでも未対応である。
+同じ文書IDに複数の版や実体がロックされている場合は `--revision` または `--sha256` で特定する。Web取得版の本文抽出、PDFの章検索、Markdownの見出し検索はM3でも未対応である。
 
 ## 既存例での確認
 

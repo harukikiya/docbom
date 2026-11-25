@@ -137,10 +137,11 @@ Web、API、アプリなどから自分たちが取得した証跡を指す。
   storage_path: "store/capture/12/34/1234....warc"
   sha256: "1234..."
   resource_manifest_sha256: "5678..."
+  normalized_content_sha256: "9abc..."
   completeness: complete_within_declared_scope
 ```
 
-比較用の正規化本文ハッシュは、厳密な実体識別子とは別に記録する。正規化結果の一致を、文書全体の無変更とみなさない。
+比較用の正規化本文ハッシュは、厳密な実体識別子とは別に記録する。現在のアルゴリズム `html-visible-text-v1` は、2xxのHTML応答からscript・style・noscript・templateを除外した可視テキストを正規化し、URL別ハッシュとURL順のページハッシュ集合の全体ハッシュを計算する。正規化結果の一致を、文書全体の無変更とみなさない。
 
 `completeness` の候補：
 
@@ -149,6 +150,22 @@ Web、API、アプリなどから自分たちが取得した証跡を指す。
 - `unknown`
 
 Webサイト全体の完全性を意味しないよう、必ず取得プロファイルの範囲と組み合わせて解釈する。
+
+### Capture比較レポート
+
+2つのCaptureの機械的な比較結果は、人が管理するDocument YAMLとは分離して `state/CANDIDATE_ID.diff.yaml` に保存する。主な項目は次のとおりである。
+
+- `previous`、`candidate`：取得ID、Capture Profile、取得時刻、完全性、各種ハッシュ
+- `profile_comparison`：完全なプロファイルを比較できたか、旧形式のID・版・entrypointsによる互換比較か
+- `normalization_algorithm`：正規化本文ハッシュのアルゴリズム名
+- `result`：URL差分がなければ `unchanged`、あれば `changed`
+- `summary`：追加・削除・変更・同一の件数、応答集合・本文・正規化本文・失敗・完全性の変化有無
+- `changes`：URLごとの分類、変更項目、比較前後の状態
+- `unchanged_urls`：成功・失敗・除外を含む同一URL
+- `warnings`：旧形式の互換比較など、解釈上の注意
+- `review_status`、`review_cause`：人による確認状態と原因の記録欄
+
+WARC SHA-256は取得イベントの厳密な識別に使い、その差だけを公式側更新とみなさない。応答本文の比較を厳密な差分、正規化本文の比較を補助情報として扱う。比較レポートの生成だけではDocument YAMLやプロジェクトロックを変更しない。
 
 ## 6. Derivative
 
