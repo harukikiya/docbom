@@ -5,6 +5,7 @@ from pathlib import Path
 from . import __version__
 from .capture import capture_web
 from .catalog import Catalog, lock_file
+from .compare import compare_web_captures
 from .ingest import ingest_git, ingest_pdf, init_project, init_store
 from .util import DocBOMError, atomic_write, write_yaml
 
@@ -69,6 +70,15 @@ def build_parser():
     web.add_argument("--capture-id", help="unique capture ID; generated from the timestamp by default")
     web.add_argument("--acquired-at", help="capture timestamp; defaults to current UTC time")
     web.add_argument("--timeout", type=float, default=10.0, help="per-request timeout in seconds")
+
+    compare = commands.add_parser("compare", help="compare two captures without changing document selections")
+    compare_commands = compare.add_subparsers(dest="compare_command", required=True)
+    web_compare = compare_commands.add_parser("web", help="compare static Web capture responses and failures")
+    web_compare.add_argument("--store", required=True, help="document store directory")
+    web_compare.add_argument("--previous", required=True, help="earlier capture ID")
+    web_compare.add_argument("--candidate", required=True, help="new capture ID")
+    web_compare.add_argument("--output", help="new comparison report path; defaults to state/CANDIDATE.diff.yaml")
+    web_compare.add_argument("--compared-at", help="comparison timestamp; defaults to current UTC time")
 
     validate = commands.add_parser("validate", help="validate a store, project, and lock")
     validate.add_argument("--store", required=True)
@@ -182,6 +192,21 @@ def _run(args):
         if not result["complete"]:
             print("error: Web capture has failed resources; see the capture report", file=sys.stderr)
             return 1
+        return 0
+
+    if args.command == "compare":
+        result = compare_web_captures(
+            args.store,
+            args.previous,
+            args.candidate,
+            output=args.output,
+            compared_at=args.compared_at,
+        )
+        print(f"report: {result['report']}")
+        print(f"result: {result['result']}")
+        print(f"changes: {len(result['data']['changes'])}")
+        for warning in result["data"]["warnings"]:
+            print(f"warning: {warning}", file=sys.stderr)
         return 0
 
     if args.command == "validate":

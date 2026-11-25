@@ -32,16 +32,17 @@ DocBOMは、Docs as Code、SBOM、技術文書の構成管理、プロベナン�
 
 ## 現在の状態
 
-M1のスキーマ・テンプレート・架空文書セット、M2の最小CLIに加え、M3aの静的Web取得を実装しています。
+M1のスキーマ・テンプレート・架空文書セット、M2の最小CLIに加え、M3の静的Web取得と再取得結果の差分検査を実装しています。
 
 - `init`：文書ストアとプロジェクト設定を初期化
 - `ingest`：PDFとGit文書をハッシュアドレスで保存し、Document YAMLを作成・更新
 - `capture web`：Capture Profileに従って静的HTML・CSS・画像を取得し、WARC・URL別資源一覧・取得レポートを保存
+- `compare web`：2つの取得版について、URL・HTTPステータス・応答本文・正規化本文・取得失敗の差分レポートを作成
 - `validate`：スキーマ、ID、関係先、実体ハッシュ、ロックと目録の一致を検査
 - `resolve`：版固定、適用条件、最新Web取得版から `docbom.lock.yaml` を生成
 - `get`：ロック済み実体の取得、PDFページ指定、Git文書の行範囲指定による本文抽出
 
-M3aの取得は既存のDocument YAMLやプロジェクトロックを自動変更しません。JavaScript実行、二回取得の差分比較、正規化本文ハッシュはM3b以降の対象です。
+取得と比較は、既存のDocument YAMLやプロジェクトロックを自動変更しません。WARCのハッシュ差は取得イベントの差として扱い、URLごとの応答本文を厳密に比較します。HTMLの正規化本文ハッシュは比較の補助であり、画像・CSSなどの変更まで無変更とは断定しません。差分の原因も自動断定せず、人が取得の非決定性・取得漏れ・公式側更新を確認します。JavaScript実行とブラウザ自動化は対象外です。
 
 ## 設計文書
 
@@ -81,7 +82,7 @@ DocBOMリポジトリ（このリポジトリ）
 GUI、データベース、本格的なRAG基盤、MCPサーバーは作らず、YAMLと小さなCLIで次の流れを実装しています。
 
 ```text
-init → ingest / capture → validate → resolve → get
+init → ingest / capture → compare（再取得時） → validate → resolve → get
 ```
 
 詳細は[CLI利用手順](docs/cli.md)と[開発ロードマップ](docs/roadmap.md)を参照してください。

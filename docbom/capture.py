@@ -14,9 +14,16 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from . import __version__
 from .catalog import require_valid
 from .util import DocBOMError, atomic_write, load_yaml, parse_datetime, sha256_bytes, utc_now
+from .webtext import (
+    HTML_CONTENT_TYPES,
+    NORMALIZATION_ALGORITHM,
+    aggregate_normalized_digest,
+    decode_body,
+    media_type,
+    normalized_resource_digest,
+)
 
 
-HTML_CONTENT_TYPES = {"text/html", "application/xhtml+xml"}
 CSS_CONTENT_TYPES = {"text/css"}
 CSS_URL_PATTERN = re.compile(r"url\(\s*(['\"]?)(.*?)\1\s*\)", re.IGNORECASE)
 CSS_IMPORT_PATTERN = re.compile(r"@import\s+(['\"])(.*?)\1", re.IGNORECASE)
@@ -97,28 +104,15 @@ def _content_type(headers):
     return None
 
 
-def _media_type(content_type):
-    return (content_type or "").split(";", 1)[0].strip().lower()
-
-
-def _decode_for_discovery(body, content_type):
-    match = re.search(r"charset\s*=\s*['\"]?([^;\s'\"]+)", content_type or "", re.IGNORECASE)
-    encoding = match.group(1) if match else "utf-8"
-    try:
-        return body.decode(encoding, errors="replace")
-    except LookupError:
-        return body.decode("utf-8", errors="replace")
-
-
 def _discover_references(body, content_type):
-    media_type = _media_type(content_type)
-    if media_type in HTML_CONTENT_TYPES:
+    current_media_type = media_type(content_type)
+    if current_media_type in HTML_CONTENT_TYPES:
         parser = _HTMLReferenceParser()
-        parser.feed(_decode_for_discovery(body, content_type))
+        parser.feed(decode_body(body, content_type))
         parser.close()
         return parser.base, parser.references
-    if media_type in CSS_CONTENT_TYPES:
-        text = _decode_for_discovery(body, content_type)
+    if current_media_type in CSS_CONTENT_TYPES:
+        text = decode_body(body, content_type)
         urls = [match.group(2).strip() for match in CSS_URL_PATTERN.finditer(text)]
         urls.extend(match.group(2).strip() for match in CSS_IMPORT_PATTERN.finditer(text))
         return None, [(url, True) for url in urls if url]
@@ -199,7 +193,7 @@ def capture_web(profile_path, store, capture_id=None, acquired_at=None, timeout=
     profile = load_yaml(profile_path)
     require_valid(profile, "capture-profile.schema.json", str(profile_path))
     if profile["access_context"]["authentication"] != "none":
-        raise DocBOMError("M3a supports only Capture Profiles with authentication: none")
+        raise DocBOMError("static Web capture supports only Capture Profiles with authentication: none")
 
     captured_at = acquired_at or utc_now()
     parsed_time = parse_datetime(captured_at)
@@ -260,14 +254,16 @@ def capture_web(profile_path, store, capture_id=None, acquired_at=None, timeout=
         status, reason_text, headers, body = response
         content_type = _content_type(headers)
         body_digest = sha256_bytes(body)
-        resources.append(
-            {
-                "url": url,
-                "status": status,
-                "content_type": content_type,
-                "sha256": body_digest,
-            }
-        )
+        resource = {
+            "url": url,
+            "status": status,
+            "content_type": content_type,
+            "sha256": body_digest,
+        }
+        normalized_digest = normalized_resource_digest(resource, body)
+        if normalized_digest is not None:
+            resource["normalized_content_sha256"] = normalized_digest
+        resources.append(resource)
         warc_records.append(_warc_record(url, captured_at, capture_id, status, reason_text, headers, body))
         succeeded = 200 <= status < 300
         event = {
@@ -280,7 +276,7 @@ def capture_web(profile_path, store, capture_id=None, acquired_at=None, timeout=
         if not succeeded:
             event["error"] = f"HTTP status {status}"
             if 300 <= status < 400:
-                event["error"] += "; redirects are not followed in M3a"
+                event["error"] += "; redirects are not followed by static Web capture"
         events.append(event)
         if succeeded:
             base, references = _discover_references(body, content_type)
@@ -296,6 +292,7 @@ def capture_web(profile_path, store, capture_id=None, acquired_at=None, timeout=
         store, resource_content, ".resources.json"
     )
     completeness = "partial" if failed else "complete_within_declared_scope"
+    normalized_digest = aggregate_normalized_digest(resources)
     artifact = {
         "role": "capture",
         "kind": "web_snapshot",
@@ -308,9 +305,13 @@ def capture_web(profile_path, store, capture_id=None, acquired_at=None, timeout=
         "resource_manifest_sha256": resource_digest,
         "completeness": completeness,
     }
+    if normalized_digest is not None:
+        artifact["normalized_content_sha256"] = normalized_digest
     report = {
         "capture_id": capture_id,
         "capture_profile": artifact["capture_profile"],
+        "profile": profile,
+        "normalization_algorithm": NORMALIZATION_ALGORITHM,
         "acquired_at": captured_at,
         "entrypoints": entrypoints,
         "summary": {

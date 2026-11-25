@@ -169,6 +169,9 @@ class StaticWebCaptureTests(unittest.TestCase):
             report = load_yaml(first_report_path)
             self.assertEqual({"fetched": 5, "succeeded": 5, "failed": 0, "excluded": 3}, report["summary"])
             self.assertEqual("complete_within_declared_scope", report["artifact"]["completeness"])
+            self.assertEqual("html-visible-text-v1", report["normalization_algorithm"])
+            self.assertEqual(load_yaml(profile), report["profile"])
+            self.assertRegex(report["artifact"]["normalized_content_sha256"], r"^[0-9a-f]{64}$")
             resources = json.loads((store / report["artifact"]["resource_manifest_path"]).read_text(encoding="utf-8"))
             by_url = {entry["url"]: entry for entry in resources}
             self.assertEqual(5, len(by_url))
@@ -177,6 +180,10 @@ class StaticWebCaptureTests(unittest.TestCase):
                     entry = by_url[f"{base}{path}"]
                     self.assertEqual(200, entry["status"])
                     self.assertEqual(route[1], entry["content_type"])
+                    if route[1].split(";", 1)[0] == "text/html":
+                        self.assertRegex(entry["normalized_content_sha256"], r"^[0-9a-f]{64}$")
+                    else:
+                        self.assertNotIn("normalized_content_sha256", entry)
                     import hashlib
                     self.assertEqual(hashlib.sha256(route[2]).hexdigest(), entry["sha256"])
             excluded = {event["url"]: event["reason"] for event in report["events"] if event["outcome"] == "excluded"}

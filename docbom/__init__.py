@@ -1,3 +1,3 @@
 """DocBOM minimal command-line implementation."""
 
-__version__ = "0.3.0a1"
+__version__ = "0.3.0"
