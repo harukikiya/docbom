@@ -32,15 +32,16 @@ DocBOMは、Docs as Code、SBOM、技術文書の構成管理、プロベナン�
 
 ## 現在の状態
 
-M1のスキーマ・テンプレート・架空文書セットと、M2の最小CLIを実装しています。
+M1のスキーマ・テンプレート・架空文書セット、M2の最小CLIに加え、M3aの静的Web取得を実装しています。
 
 - `init`：文書ストアとプロジェクト設定を初期化
 - `ingest`：PDFとGit文書をハッシュアドレスで保存し、Document YAMLを作成・更新
+- `capture web`：Capture Profileに従って静的HTML・CSS・画像を取得し、WARC・URL別資源一覧・取得レポートを保存
 - `validate`：スキーマ、ID、関係先、実体ハッシュ、ロックと目録の一致を検査
 - `resolve`：版固定、適用条件、最新Web取得版から `docbom.lock.yaml` を生成
 - `get`：ロック済み実体の取得、PDFページ指定、Git文書の行範囲指定による本文抽出
 
-Webの取得・再取得と差分レポートはM3の対象です。M2では既存のWeb取得版を検証・ロックできます。
+M3aの取得は既存のDocument YAMLやプロジェクトロックを自動変更しません。JavaScript実行、二回取得の差分比較、正規化本文ハッシュはM3b以降の対象です。
 
 ## 設計文書
 
@@ -80,7 +81,7 @@ DocBOMリポジトリ（このリポジトリ）
 GUI、データベース、本格的なRAG基盤、MCPサーバーは作らず、YAMLと小さなCLIで次の流れを実装しています。
 
 ```text
-init → ingest → validate → resolve → get
+init → ingest / capture → validate → resolve → get
 ```
 
 詳細は[CLI利用手順](docs/cli.md)と[開発ロードマップ](docs/roadmap.md)を参照してください。

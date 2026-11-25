@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .capture import capture_web
 from .catalog import Catalog, lock_file
 from .ingest import ingest_git, ingest_pdf, init_project, init_store
 from .util import DocBOMError, atomic_write, write_yaml
@@ -60,6 +61,15 @@ def build_parser():
     git.add_argument("--tag")
     _add_ingest_metadata(git)
 
+    capture = commands.add_parser("capture", help="capture static Web documentation")
+    capture_commands = capture.add_subparsers(dest="capture_command", required=True)
+    web = capture_commands.add_parser("web", help="capture static HTML, CSS, and images")
+    web.add_argument("profile", help="Capture Profile YAML path")
+    web.add_argument("--store", required=True, help="document store directory")
+    web.add_argument("--capture-id", help="unique capture ID; generated from the timestamp by default")
+    web.add_argument("--acquired-at", help="capture timestamp; defaults to current UTC time")
+    web.add_argument("--timeout", type=float, default=10.0, help="per-request timeout in seconds")
+
     validate = commands.add_parser("validate", help="validate a store, project, and lock")
     validate.add_argument("--store", required=True)
     validate.add_argument("--project")
@@ -104,7 +114,7 @@ def _extract_text(artifact, path, page=None, lines=None):
         except UnicodeDecodeError as exc:
             raise DocBOMError(f"artifact is not UTF-8 text: {path}") from exc
     else:
-        raise DocBOMError(f"text extraction is not supported for {artifact['kind']} in M2")
+        raise DocBOMError(f"text extraction is not supported for {artifact['kind']} artifacts")
 
     if lines is not None:
         try:
@@ -154,6 +164,24 @@ def _run(args):
         print(f"manifest: {result['manifest']}")
         print(f"artifact: {result['artifact']}")
         print(f"sha256: {result['sha256']}")
+        return 0
+
+    if args.command == "capture":
+        result = capture_web(
+            args.profile,
+            args.store,
+            capture_id=args.capture_id,
+            acquired_at=args.acquired_at,
+            timeout=args.timeout,
+        )
+        print(f"capture_id: {result['capture_id']}")
+        print(f"warc: {result['warc']}")
+        print(f"resources: {result['resources']}")
+        print(f"report: {result['report']}")
+        print(f"status: {'complete' if result['complete'] else 'partial'}")
+        if not result["complete"]:
+            print("error: Web capture has failed resources; see the capture report", file=sys.stderr)
+            return 1
         return 0
 
     if args.command == "validate":
